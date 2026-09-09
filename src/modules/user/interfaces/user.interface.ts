@@ -1,7 +1,7 @@
-import {Types} from "mongoose";
+import { Types , Document} from "mongoose";
 
-export interface IUser {
-    _id?: Types.ObjectId;
+export interface IUser extends  Document{
+    _id: Types.ObjectId;
     name: string;
     email: string;
     password: string;
@@ -10,6 +10,12 @@ export interface IUser {
     createdAt?: Date;
     updatedAt?: Date;
 
+    //instance methods
+
+    comparePassword(candidatePassword: string): Promise<boolean>;
+
 }
+
+
 
 export type CreateUserDto = Pick<IUser, 'name' | 'email' | 'password'>
