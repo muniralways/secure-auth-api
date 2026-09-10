@@ -1,21 +1,21 @@
 import {z} from "zod";
-import "dotenv/config";
+import {envSchema} from "@config/env/schema.js";
 
+const parsed = envSchema.safeParse(process.env)
+if (!parsed.success) {
+    console.dir(z.treeifyError(parsed.error), { depth: null });
+    process.exit(1);
+}
+const data = parsed.data
 
-const envSchema = z.object({
-    NODE_ENV: z.enum(["development", "production"]).default("development"),
+type parsedEnv = z.infer<typeof  envSchema>
+export type Env = Readonly<parsedEnv & {
+    readonly isDevelopment: boolean
+    readonly isProduction: boolean
+}>
 
-    PORT: z.coerce.number().default(5000),
-
-    MONGO_URI: z.string().min(1),
-
-    JWT_ACCESS_SECRET: z.string().min(32),
-
-    JWT_REFRESH_SECRET: z.string().min(32),
-
-    ACCESS_TOKEN_EXPIRES: z.string(),
-
-    REFRESH_TOKEN_EXPIRES: z.string(),
-});
-
-export const env = envSchema.parse(process.env);
+export const env: Env = Object.freeze({
+    ...data,
+    isDevelopment: data.NODE_ENV === 'development',
+    isProduction: data.NODE_ENV === 'production'
+})
